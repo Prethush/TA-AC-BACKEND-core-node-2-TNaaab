@@ -10,13 +10,13 @@ The structure is
 You are currently inside server.js
 
 Write code to 
-- capture absolute path of `server.js`(itself) ///home/prethush/Desktop/node/server.js
-- get absolute path of `app.js`  ///home/prethush/Desktop/node/app.js
+- capture absolute path of `server.js`(itself) 
+- get absolute path of `app.js`  ///
 - get realtive path of `index.html` //./index.html
 - get absolute path of `index.html` using `path module` //
 
-let absolutePath = path.join(__dirname, './index.html');
-/home/prethush/Desktop/node/index.html
+
+
  
 #### Capture data on server
 
