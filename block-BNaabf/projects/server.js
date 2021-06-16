@@ -13,20 +13,20 @@ function handleRequest(req, res) {
     
     let store = "";
 
-    if(req.method === 'GET' && req.url === '/form') {
-        console.log(store);
-        fs.createReadStream('./form.html').pipe(res);
-    }
-
     req.on('data', (chunk) => {
         store += chunk;
     })
 
     req.on('end', () => {
+
+        if(req.method === 'GET' && req.url === '/form') {
+            res.setHeader('Content-Type', 'text/html');
+            fs.createReadStream('./form.html').pipe(res);
+        }
         if(req.method === 'POST' && req.url === '/form') {
-            console.log(store);
             let parsedData = qs.parse(store);
-            res.end(JSON.stringify(parsedData));
+            res.setHeader('Content-Type', 'text/html');
+            res.end(`<h2>${parsedData.name}</h2><h3>${parsedData.email}</h3><h4>${parsedData.age}</h4>`);
         }
         
     })
