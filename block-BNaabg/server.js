@@ -19,77 +19,55 @@ function handleRequest(req, res) {
     req.on('end', () => {
         if(req.method === 'POST' && req.url === '/users') {
             let userName = JSON.parse(store).username;
-            fs.open(userDir + userName + ".json", 'wx', (err) => {
+            fs.open(userDir + userName + ".json", 'wx', (err, fd) => {
+                if(err) return console.log(err);
+                console.log(fd);
+                fs.writeFile(fd, store, (err) => {
+                    if(err) return console.log(err);
+                    fs.close(fd, () => {
+                        return res.end(`${userName} created successfully`);
+                    });
+                 });
                 
-                if(err) {
-                console.log(err);
-                }
             });
-
-            fs.writeFile(userDir + userName + ".json", store, (err) => {
-                if(err) {
-                    console.log(err);
-                }
-            });
-
-            let file_Descriptor = fs.openSync(userDir + userName +".json");
-
-            fs.close(file_Descriptor, (err) => {
-                if(err) {
-                    console.log(err);
-                } else{
-                    res.end(`${userName} Created`);
-                }
-            });
-
             
         }
 
         if(parsedUrl.pathname === '/users' && req.method === 'GET') {
-
-            
-            fs.createReadStream(userDir + user + ".json").pipe(res);
+            res.setHeader('Content-Type', 'application/json');
+            return fs.createReadStream(userDir + user + ".json").pipe(res);
         }
 
         if(parsedUrl.pathname === '/users' && req.method === 'DELETE') {
             fs.unlink(userDir + user + ".json", (err) => {
-                if(err) {
-                console.log(err);
-                } else{
-                    res.end(`${user} is deleted`);
-                }
+                if(err) return console.log(err);
+                 return res.end(`${user} is deleted`);
+
             });
         }
 
         if(parsedUrl.pathname === '/users' && req.method === 'PUT') {
-            fs.open(userDir + user + ".json", 'r+' , (err) => {
-                if(err) {
-                    console.log(err);
-                }
-            });
+            fs.open(userDir + user + ".json", 'r+' , (err, fd) => {
+                if(err) return console.log(err);
+                fs.ftruncate(fd, (err) => {
+                    if(err) return console.log(err);
+                    fs.writeFile(fd, store, (err) => {
+                        if(err) return console.log(err);
 
-        let file_Descriptor = fs.openSync(userDir + user +".json");   
+                        fs.close(fd, (err) => {
+                            return res.end(`${user} is updated successfully`);
+                        });
+                        
+                    });
+                });
+            });     
 
-            fs.truncate(file_Descriptor, (err) => {
-                if(err) {
-                    console.log(err);
-                }
-            });
+            
 
-            fs.writeFile(userDir + user + ".json", store, (err) => {
-                if(err) {
-                console.log(err);
-                }
-            });
-
-            fs.close(file_Descriptor, (err) => {
-                if(err) {
-                    console.log(err);
-                } else {
-                    res.end(`${user} is updated`);
-                }
-            });
         }
+
+        res.statusCode = 404;
+        res.end('Page not found');
     });
 
 
